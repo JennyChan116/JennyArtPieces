@@ -7,8 +7,8 @@ from data.weather_data_html_style import weather_data
 pygame.init()
 
 # Constants
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = 700
+WINDOW_WIDTH = 1200
+WINDOW_HEIGHT = 900
 BACKGROUND_COLOR = (245, 245, 255)
 FPS = 60
 
@@ -132,22 +132,50 @@ class WeatherVisualization:
     
     def draw_info(self, day_data):
         """Draw weather information on the left side"""
-        # Description
-        desc_text = self.font.render(day_data['description'], True, (51, 51, 51))
-        self.screen.blit(desc_text, (40, 40))
+        # Description - split long text into multiple lines
+        description = day_data['description']
+        max_width = 500  # Maximum width for text in pixels
+        
+        # Split long descriptions into multiple lines
+        words = description.split(' ')
+        lines = []
+        current_line = ""
+        
+        for word in words:
+            test_line = current_line + (" " if current_line else "") + word
+            text_width = self.font.size(test_line)[0]
+            
+            if text_width <= max_width:
+                current_line = test_line
+            else:
+                if current_line:
+                    lines.append(current_line)
+                current_line = word
+        
+        if current_line:
+            lines.append(current_line)
+        
+        # Draw description lines
+        y_offset = 40
+        for line in lines:
+            desc_text = self.font.render(line, True, (51, 51, 51))
+            self.screen.blit(desc_text, (40, y_offset))
+            y_offset += 30  # Line spacing
         
         # Date
+        date_y = y_offset + 10
         date_text = self.small_font.render(day_data['date'], True, (102, 102, 102))
-        self.screen.blit(date_text, (40, 80))
+        self.screen.blit(date_text, (40, date_y))
         
         # Weather data
+        info_y = date_y + 40
         temp_text = self.small_font.render(f"Temp: {day_data['temp_min']}~{day_data['temp_max']}°C", True, (68, 68, 68))
         humidity_text = self.small_font.render(f"Humidity: {day_data['humidity_min']}~{day_data['humidity_max']}%", True, (68, 68, 68))
         wind_text = self.small_font.render(f"Wind: {day_data['wind_speed']} m/s", True, (68, 68, 68))
         
-        self.screen.blit(temp_text, (40, 120))
-        self.screen.blit(humidity_text, (40, 145))
-        self.screen.blit(wind_text, (40, 170))
+        self.screen.blit(temp_text, (40, info_y))
+        self.screen.blit(humidity_text, (40, info_y + 25))
+        self.screen.blit(wind_text, (40, info_y + 50))
     
     def run(self):
         """Main game loop"""
